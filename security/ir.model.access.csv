@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_chatbot_script_webhook_user,chatbot.script.webhook.user,im_livechat.model_chatbot_script,base.group_user,1,0,0,0
+access_chatbot_script_webhook_manager,chatbot.script.webhook.manager,im_livechat.model_chatbot_script,base.group_system,1,1,1,1

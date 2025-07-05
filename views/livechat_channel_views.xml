@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="chatbot_script_view_form_webhook" model="ir.ui.view">
+        <field name="name">chatbot.script.form.webhook</field>
+        <field name="model">chatbot.script</field>
+        <field name="inherit_id" ref="im_livechat.chatbot_script_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='script_step_ids']" position="before">
+                <group string="Configuración de Webhook">
+                    <field name="webhook_enabled"/>
+                    <field name="webhook_url" attrs="{'invisible': [('webhook_enabled', '=', False)]}"/>
+                    <field name="webhook_timeout" attrs="{'invisible': [('webhook_enabled', '=', False)]}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
