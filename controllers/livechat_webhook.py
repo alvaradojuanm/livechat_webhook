@@ -10,20 +10,33 @@ class LivechatWebhookController(http.Controller):
     def push_message(self, channel_id=None, message=None, **kwargs):
         _logger.info(f"[livechat_webhook] Mensaje recibido en canal {channel_id}: {message}")
 
-        channel = request.env['mail.channel'].sudo().browse(int(channel_id) if channel_id else 0)
+        if not channel_id:
+            _logger.error("No se proporcionó channel_id.")
+            return {'status': 'error', 'error': 'No se proporcionó channel_id'}
+        if not message:
+            _logger.error("No se proporcionó mensaje.")
+            return {'status': 'error', 'error': 'No se proporcionó mensaje'}
+
+        channel = request.env['mail.channel'].sudo().browse(int(channel_id))
         if not channel.exists():
-            _logger.error("Canal no encontrado.")
+            _logger.error(f"Canal no encontrado: {channel_id}")
             return {'status': 'error', 'error': 'Canal no encontrado'}
 
         script = channel._get_chatbot_script()
+        _logger.info(f"Script obtenido: {script}")
         if script and script.webhook_enabled and script.webhook_url:
+            _logger.info(f"Webhook habilitado: {script.webhook_enabled}, URL: {script.webhook_url}")
             try:
                 reply = script._send_to_webhook(message, channel)
+                _logger.info(f"Respuesta del webhook: {reply}")
                 if reply:
                     script._post_webhook_message(channel, reply)
                     return {'status': 'ok', 'reply': reply}
+                _logger.warning("El webhook no devolvió respuesta.")
                 return {'status': 'no_reply'}
             except Exception as e:
-                _logger.error(f"Error procesando webhook: {e}")
+                _logger.error(f"Error procesando webhook: {e}", exc_info=True)
                 return {'status': 'error', 'error': str(e)}
+        else:
+            _logger.warning(f"Webhook deshabilitado o URL no configurada para el script: {script}")
         return {'status': 'disabled'}

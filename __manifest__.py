@@ -4,7 +4,7 @@
     'category': 'Website/Live Chat',
     'summary': 'Integra Live Chat con webhooks externos (N8N)',
     'description': """
-        Este m  dulo permite integrar el Live Chat de Odoo con webhooks externos.
+        Este modulo permite integrar el Live Chat de Odoo con webhooks externos.
         Intercepta los mensajes del chatbot y los env  a a un webhook configurado,
         devolviendo la respuesta del webhook al usuario.
     """,
