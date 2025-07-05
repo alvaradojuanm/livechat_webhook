@@ -12,6 +12,10 @@ class ChatbotScript(models.Model):
     webhook_timeout = fields.Integer('Timeout (s)', default=30)
 
     def _send_to_webhook(self, message_body, discuss_channel):
+        if not self.webhook_enabled or not self.webhook_url:
+            _logger.info("Webhook no está habilitado o URL no configurada.")
+            return None
+
         payload = {
             'message': message_body,
             'channel_id': discuss_channel.id,
@@ -25,9 +29,10 @@ class ChatbotScript(models.Model):
             )
             if response.status_code == 200:
                 return response.json().get('reply') or response.text
-            _logger.error(f"Webhook error {response.status_code}: {response.text}")
+            else:
+                _logger.error(f"Error webhook {response.status_code}: {response.text}")
         except Exception as e:
-            _logger.error(f"Error al conectar al webhook: {e}")
+            _logger.error(f"Error conectando al webhook: {e}")
         return None
 
     def _post_webhook_message(self, discuss_channel, message_body):
@@ -40,7 +45,6 @@ class ChatbotScript(models.Model):
             author_id=bot_partner.id,
             message_type='comment'
         )
-
 
     def _get_chatbot_script(self):
         script = super()._get_chatbot_script()

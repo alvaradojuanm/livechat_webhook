@@ -2,9 +2,9 @@
 <odoo>
     <data noupdate="1">
         <record id="chatbot_script_webhook_example" model="chatbot.script">
-            <field name="title">Webhook ChatBot</field>
+            <field name="title">DployXperts ChatBot</field>
             <field name="webhook_enabled">True</field>
-            <field name="webhook_url">https://tuservidorn8n.com/webhook/ejemplo</field>
+            <field name="webhook_url">https://n8n.dployxperts.com/webhook/360e834f-3af9-4d76-8bf5-11684c2e6f1c</field>
             <field name="webhook_timeout">30</field>
         </record>
     </data>
