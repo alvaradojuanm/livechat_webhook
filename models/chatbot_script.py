@@ -15,6 +15,11 @@ class ChatbotScript(models.Model):
     webhook_headers = fields.Text('Headers adicionales', help="Headers en formato JSON. Ejemplo: {\"Authorization\": \"Bearer token\"}")
 
     def _send_to_webhook(self, message_body, discuss_channel):
+        """
+        Envía el mensaje recibido al webhook externo configurado en el script.
+        Devuelve la respuesta del webhook o None si hay error.
+        """
+        _logger.info(f"[Webhook] Intentando enviar mensaje al webhook para canal {discuss_channel.id}...")
         if not self.webhook_enabled or not self.webhook_url:
             _logger.info("Webhook no está habilitado o URL no configurada.")
             return None
@@ -35,7 +40,6 @@ class ChatbotScript(models.Model):
             'channel_name': discuss_channel.name,
             'timestamp': fields.Datetime.now().isoformat()
         }
-        
         headers = {'Content-Type': 'application/json'}
         if self.webhook_headers:
             try:
@@ -44,21 +48,34 @@ class ChatbotScript(models.Model):
             except Exception as e:
                 _logger.error(f"Error procesando headers adicionales: {e}")
 
-        _logger.info(f"Enviando payload al webhook {self.webhook_url}: {payload}")
+        # Permitir método HTTP configurable en el futuro
+        method = getattr(self, 'webhook_method', 'POST').upper()
+        _logger.info(f"[Webhook] Enviando payload a {self.webhook_url} con método {method}: {payload} y headers: {headers}")
         try:
-            response = requests.post(
-                self.webhook_url,
-                json=payload,
-                headers=headers,
-                timeout=self.webhook_timeout
-            )
+            if method == 'POST':
+                response = requests.post(
+                    self.webhook_url,
+                    json=payload,
+                    headers=headers,
+                    timeout=self.webhook_timeout
+                )
+            elif method == 'GET':
+                response = requests.get(
+                    self.webhook_url,
+                    params=payload,
+                    headers=headers,
+                    timeout=self.webhook_timeout
+                )
+            else:
+                _logger.error(f"Método HTTP no soportado: {method}")
+                return None
             _logger.info(f"Respuesta del webhook ({response.status_code}): {response.text}")
-            
             if response.status_code == 200:
                 try:
                     response_data = response.json()
                     return response_data.get('reply') or response_data.get('message') or response.text
-                except:
+                except Exception as e:
+                    _logger.warning(f"No se pudo decodificar JSON de la respuesta: {e}")
                     return response.text
             else:
                 _logger.error(f"Error webhook {response.status_code}: {response.text}")
