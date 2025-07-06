@@ -13,12 +13,23 @@ class LivechatWebhookController(http.Controller):
         if not channel_id:
             _logger.error("No se proporcionó channel_id.")
             return {'status': 'error', 'error': 'No se proporcionó channel_id'}
+
         if not message:
             _logger.error("No se proporcionó mensaje.")
             return {'status': 'error', 'error': 'No se proporcionó mensaje'}
 
-        channel = request.env['mail.channel'].sudo().browse(int(channel_id))
-        if not channel.exists():
+        # Buscar canal por ID o UUID
+        channel = None
+        try:
+            if str(channel_id).isdigit():
+                channel = request.env['mail.channel'].sudo().browse(int(channel_id))
+            else:
+                channel = request.env['mail.channel'].sudo().search([('uuid', '=', channel_id)], limit=1)
+        except Exception as e:
+            _logger.error(f"Error obteniendo canal: {e}")
+            return {'status': 'error', 'error': str(e)}
+
+        if not channel or not channel.exists():
             _logger.error(f"Canal no encontrado: {channel_id}")
             return {'status': 'error', 'error': 'Canal no encontrado'}
 
