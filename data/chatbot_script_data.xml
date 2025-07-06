@@ -5,9 +5,9 @@
             <field name="title">DployXperts ChatBot</field>
             <field name="webhook_enabled">True</field>
             <field name="webhook_url">https://n8n.dployxperts.com/webhook-test/665d27c6-4c8f-476a-816c-14c45ea2bd5b</field>
-            <field name="webhook_timeout">30</field>
+            <field name="webhook_timeout">120</field>
             <!-- Si el webhook requiere headers, descomenta y ajusta el siguiente campo -->
-            <!-- <field name="webhook_headers">{'Authorization': 'Bearer token'}</field> -->
+            <!-- <field name="webhook_headers">{"Authorization": "Bearer token"}</field> -->
         </record>
     </data>
 </odoo>

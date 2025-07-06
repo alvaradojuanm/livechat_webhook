@@ -1,34 +1,40 @@
 /** @odoo-module **/
-
+import { WebsiteLivechatWidget } from 'website_livechat.widget';
 import { patch } from '@web/core/utils/patch';
-import { Livechat } from '@website_livechat/components/livechat/livechat';
+import { jsonrpc } from '@web/core/network/rpc_service';
 
-patch(Livechat.prototype, {
-    async onMessageSent(message) {
-        await this._super(...arguments);
-
-        const msgContent = message?.content || '';
-        const channelUUID = this.channel?.uuid || null;
-
-        if (!msgContent || !channelUUID) return;
-
-        this.rpc('/livechat/webhook', {
-            channel_id: channelUUID,
-            message: msgContent
-        }).then(res => {
-            if (res.reply) {
-                this.addMessage({
-                    content: res.reply,
-                    author_id: 'operator',
-                    is_operator: true,
+patch(WebsiteLivechatWidget.prototype, 'livechat_webhook_integration', {
+    
+    /**
+     * Sobrescribe el método de envío de mensajes para interceptar y enviar al webhook
+     */
+    async _onSubmitMessage(ev) {
+        const msg = this.$input.val().trim();
+        if (!msg) return;
+        
+        // Llamar al método original para enviar el mensaje normalmente
+        this._super(ev);
+        
+        // Enviar el mensaje al webhook si está configurado
+        if (this.channel_id) {
+            try {
+                console.log('Enviando mensaje al webhook:', msg);
+                const response = await jsonrpc('/livechat/webhook', {
+                    channel_id: this.channel_id,
+                    message: msg
                 });
+                
+                console.log('Respuesta del webhook:', response);
+                
+                if (response.status === 'ok' && response.reply) {
+                    // La respuesta ya se envió desde el servidor, no necesitamos hacer nada más
+                    console.log('Respuesta del webhook procesada correctamente');
+                } else if (response.status === 'error') {
+                    console.error('Error del webhook:', response.error);
+                }
+            } catch (error) {
+                console.error('Error comunicando con el webhook:', error);
             }
-        }).catch(() => {
-            this.addMessage({
-                content: "Error comunicando con el webhook.",
-                author_id: 'operator',
-                is_operator: true,
-            });
-        });
-    }
+        }
+    },
 });

@@ -1,3 +1,4 @@
+# __manifest__.py
 {
     'name': 'Live Chat Webhook Integration',
     'version': '18.0.1.0.0',
@@ -5,7 +6,7 @@
     'summary': 'Integra Live Chat con webhooks externos (N8N)',
     'description': """
         Este modulo permite integrar el Live Chat de Odoo con webhooks externos.
-        Intercepta los mensajes del chatbot y los env  a a un webhook configurado,
+        Intercepta los mensajes del chatbot y los envía a un webhook configurado,
         devolviendo la respuesta del webhook al usuario.
     """,
     'author': 'DployXperts',
